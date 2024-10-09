@@ -4,6 +4,12 @@ on:
     branches:
       - main
       - "release/v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version to tag the release with, e.g., 1.2.0
+        required: true
+        default: "0.2.0"
 
 permissions:
   id-token: write
@@ -47,6 +53,17 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           verbose: true
+
+  contract-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: run contract tests
+        run: |
+          bash ./scripts/build_and_install_distro.sh
+          bash scripts/set-up-contract-tests.sh
+          pip install pytest
+          pytest contract-tests/tests
 
   lint:
     runs-on: ubuntu-latest
